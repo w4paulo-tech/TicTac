@@ -9,7 +9,8 @@ class TicTac:
         pygame.init()
         self.clock = pygame.time.Clock()
         self.settings = Settings()
-        self.screen = pygame.display.set_mode((450, 450))
+        self.screen = pygame.display.set_mode((self.settings.screen_width, 
+                                               self.settings.screen_height))
         pygame.display.set_caption("TicTacToe")
         self.tic_img = pygame.image.load('images/tic.png')
         self.tac_img = pygame.image.load('images/tac.png') 
@@ -22,44 +23,16 @@ class TicTac:
         self.zaidejas = "X"
         self.first_run = True
         # self.winning_line = None
-        # self.x_laimejimai = 0
-        # self.o_laimejimai = 0
-        # self.lygiosios = 0
+        self.x_laimejimai = 0
+        self.o_laimejimai = 0
+        self.lygiosios = 0
 
     def run_game(self):
         while True:
             self._check_events()
-            laimetojas = self._check_winner()
-            if laimetojas: #and self.laimetojas == None:
-                self.laimetojas = laimetojas
-                self.game_active = False
-                # self._winning_count()
-            
+            self._winner()
             self._update_screen()
             self.clock.tick(60)
-
-    def _game_start(self):
-        self.game_active = True
-        self.board = [[None for _ in range(3)] for _ in range(3)]
-        self.laimetojas = None
-        # self.winning_line = None
-        self.zaidejas = "X"
-        self.first_run = False
-
-    # def _winning_count(self):
-    #     if not self.first_run:
-    #         if self.laimetojas == "X":
-    #             self.x_laimejimai += 1
-    #         elif self.laimetojas == "O":
-    #             self.o_laimejimai += 1
-    #         elif self.laimetojas == "Lygiosios":
-    #             self.lygiosios += 1
-
-    # def _draw_statistics(self):
-    #     stats = (f"X: {self.x_laimejimai}\nO: {self.o_laimejimai}\n"
-    #              f"Lygiosios: {self.lygiosios}")
-    #     stat_text = TextBox(self, stats, box_x=0, box_y=0)
-    #     stat_text.draw()
 
     def _check_events(self):
         for event in pygame.event.get():
@@ -80,13 +53,54 @@ class TicTac:
                             self.zaidejas = "O" 
                         else:
                             self.zaidejas = "X"
-                    
+
+    def _game_start(self):
+        self.game_active = True
+        self.board = [[None for _ in range(3)] for _ in range(3)]
+        self.laimetojas = None
+        # self.winning_line = None
+        self.zaidejas = "X"
+        self.first_run = False
+
     def _draw_grid(self):            
         pygame.draw.line(self.screen, (0, 0, 0), (150, 0), (150, 450), 3)
         pygame.draw.line(self.screen, (0, 0, 0), (300, 0), (300, 450), 3)
         pygame.draw.line(self.screen, (0, 0, 0), (0, 150), (450, 150), 3)
         pygame.draw.line(self.screen, (0, 0, 0), (0, 300), (450, 300), 3)
+        
+    def _winner(self):
+        laimetojas = self._check_winner()
+        if laimetojas and self.laimetojas == None:
+            self.laimetojas = laimetojas
+            self.game_active = False
+            self._winning_count()
+
+    def _winning_count(self):
+        if not self.first_run:
+            if self.laimetojas == "X":
+                self.x_laimejimai += 1
+            elif self.laimetojas == "O":
+                self.o_laimejimai += 1
+            elif self.laimetojas == "Lygiosios":
+                self.lygiosios += 1
     
+    def _check_winner(self):
+        counted = self._count_lines()
+        all_lines = counted["rows"] + counted["columns"] + counted["diagonals"]
+        for count in all_lines:
+            x = count[0]
+            o = count[1]
+            if x == 3:
+                return "X"
+            elif o == 3:
+                return "O"
+
+        for row in self.board:
+            if None in row:    
+                return None
+        
+        return "Lygiosios"
+
     def _count_lines(self):
         rows = []
         columns = []
@@ -99,6 +113,7 @@ class TicTac:
                 elif self.board[r][c] == "O":
                     o += 1
             rows.append((x, o))
+            
         for c in range(3):
             x = 0
             o = 0
@@ -130,22 +145,22 @@ class TicTac:
         diagonals = [(is1_x, is1_o), (is2_x, is2_o)]
         return {"rows": rows, "columns": columns, "diagonals": diagonals}
     
-    def _check_winner(self):
-        counted = self._count_lines()
-        all_lines = counted["rows"] + counted["columns"] + counted["diagonals"]
-        for count in all_lines:
-            x = count[0]
-            o = count[1]
-            if x == 3:
-                return "X"
-            elif o == 3:
-                return "O"
+    def _draw_statistics(self):
+        stats = (f"X: {self.x_laimejimai}  O: {self.o_laimejimai}  "
+                f"Lygiosios: {self.lygiosios} ")
+        stat_text = TextBox(self, stats)
+        padding = 8
 
-        for row in self.board:
-            if None in row:    
-                return None
-        
-        return "Lygiosios"
+        bx = getattr(stat_text, "box_x", 20)
+        by = getattr(stat_text, "box_y", 10)
+        text_w, text_h = stat_text.text_surf.get_size()
+        w, h = text_w + bx * 2, text_h + by * 2
+
+        screen_w = self.screen.get_width()
+        left = max(8, (screen_w - w) // 2)
+        stat_text.box_rect = pygame.Rect(left, padding, w, h)
+        stat_text.text_rect.topleft = (stat_text.box_rect.left + bx, stat_text.box_rect.top + by)
+        stat_text.draw()
 
     def _update_screen(self):
         self.screen.fill(self.settings.bg_color)
@@ -162,7 +177,7 @@ class TicTac:
         if not self.game_active:
             self.play_button.draw_button()
             self.quit_button.draw_button()
-            # self._draw_statistics()
+            self._draw_statistics()
         
         if self.laimetojas != None:
             if self.laimetojas == "Lygiosios":

@@ -1,10 +1,10 @@
 import pygame.font
-import sys
+
 class TextBox:
     def __init__(self, tt_game, msg, bg_color=(0, 135, 0), 
                  text_color=(255, 255, 255), box_x=20, box_y=10):
         self.screen = tt_game.screen
-        self.font = tt_game.font
+        self.font = pygame.font.SysFont(None, 48)
         self.play_button = tt_game.play_button
         self.bg_color = bg_color
         self.text_color = text_color
