@@ -2,6 +2,7 @@ import sys
 import pygame
 from settings import Settings
 from button import Button
+from textbox import TextBox
 
 class TicTac:
     def __init__(self):
@@ -21,15 +22,20 @@ class TicTac:
         self.zaidejas = "X"
         self.first_run = True
         # self.winning_line = None
+        # self.x_laimejimai = 0
+        # self.o_laimejimai = 0
+        # self.lygiosios = 0
 
     def run_game(self):
         while True:
             self._check_events()
-            self._update_screen()
             laimetojas = self._check_winner()
-            if laimetojas:
+            if laimetojas: #and self.laimetojas == None:
                 self.laimetojas = laimetojas
                 self.game_active = False
+                # self._winning_count()
+            
+            self._update_screen()
             self.clock.tick(60)
 
     def _game_start(self):
@@ -39,6 +45,21 @@ class TicTac:
         # self.winning_line = None
         self.zaidejas = "X"
         self.first_run = False
+
+    # def _winning_count(self):
+    #     if not self.first_run:
+    #         if self.laimetojas == "X":
+    #             self.x_laimejimai += 1
+    #         elif self.laimetojas == "O":
+    #             self.o_laimejimai += 1
+    #         elif self.laimetojas == "Lygiosios":
+    #             self.lygiosios += 1
+
+    # def _draw_statistics(self):
+    #     stats = (f"X: {self.x_laimejimai}\nO: {self.o_laimejimai}\n"
+    #              f"Lygiosios: {self.lygiosios}")
+    #     stat_text = TextBox(self, stats, box_x=0, box_y=0)
+    #     stat_text.draw()
 
     def _check_events(self):
         for event in pygame.event.get():
@@ -117,9 +138,14 @@ class TicTac:
             o = count[1]
             if x == 3:
                 return "X"
-            if o == 3:
+            elif o == 3:
                 return "O"
-        return None
+
+        for row in self.board:
+            if None in row:    
+                return None
+        
+        return "Lygiosios"
 
     def _update_screen(self):
         self.screen.fill(self.settings.bg_color)
@@ -136,21 +162,17 @@ class TicTac:
         if not self.game_active:
             self.play_button.draw_button()
             self.quit_button.draw_button()
+            # self._draw_statistics()
         
-        if self.laimetojas:
-            msg = (f"Laimėjo {self.laimetojas} žaidėjas!")
-            text_surf = self.font.render(msg, True, (255, 255, 255), (0, 135, 0))
-            text_rect = text_surf.get_rect(center=self.screen.get_rect().center)
-            text_rect.centerx = self.play_button.rect.centerx
-            text_rect.bottom = self.play_button.rect.top - 20
-            box_x = 20
-            box_y = 10
-            box_rect = text_rect.inflate(box_x * 2, box_y * 2)
-            pygame.draw.rect(self.screen, (0, 135, 0), box_rect)
-            pygame.draw.rect(self.screen, (255, 255, 255), box_rect, 2)
-
-            self.screen.blit(text_surf, text_rect)
-
+        if self.laimetojas != None:
+            if self.laimetojas == "Lygiosios":
+                msg = ("Lygiosios!")
+                text = TextBox(self, msg)
+            else:    
+                msg = (f"Laimėjo {self.laimetojas} žaidėjas!")
+                text = TextBox(self, msg)
+            text.draw()
+        
         pygame.display.flip()
 
 if __name__ == '__main__':
