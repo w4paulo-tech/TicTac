@@ -28,6 +28,7 @@ class TicTac:
         self.lygiosios = 0
 
     def run_game(self):
+        """Paleista programa."""
         while True:
             self._check_events()
             self._winner()
@@ -35,6 +36,7 @@ class TicTac:
             self.clock.tick(60)
 
     def _check_events(self):
+        """Tikrina pelės paspaudimus."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -55,6 +57,7 @@ class TicTac:
                             self.zaidejas = "X"
 
     def _game_start(self):
+        """Žaidimo pradžia."""
         self.game_active = True
         self.board = [[None for _ in range(3)] for _ in range(3)]
         self.laimetojas = None
@@ -62,13 +65,15 @@ class TicTac:
         self.zaidejas = "X"
         self.first_run = False
 
-    def _draw_grid(self):            
+    def _draw_grid(self):
+        """Nupiešia lentelę."""            
         pygame.draw.line(self.screen, (0, 0, 0), (150, 0), (150, 450), 3)
         pygame.draw.line(self.screen, (0, 0, 0), (300, 0), (300, 450), 3)
         pygame.draw.line(self.screen, (0, 0, 0), (0, 150), (450, 150), 3)
         pygame.draw.line(self.screen, (0, 0, 0), (0, 300), (450, 300), 3)
         
     def _winner(self):
+        """Pakeičia laimėtoją."""
         laimetojas = self._check_winner()
         if laimetojas and self.laimetojas == None:
             self.laimetojas = laimetojas
@@ -76,6 +81,7 @@ class TicTac:
             self._winning_count()
 
     def _winning_count(self):
+        """Skaičiuoja laimėjimus."""
         if not self.first_run:
             if self.laimetojas == "X":
                 self.x_laimejimai += 1
@@ -85,6 +91,7 @@ class TicTac:
                 self.lygiosios += 1
     
     def _check_winner(self):
+        """Patikrina laimėtoją."""
         counted = self._count_lines()
         all_lines = counted["rows"] + counted["columns"] + counted["diagonals"]
         for count in all_lines:
@@ -102,6 +109,7 @@ class TicTac:
         return "Lygiosios"
 
     def _count_lines(self):
+        """Suskaičiuja X ir O lentelėje 3x3."""
         rows = []
         columns = []
         for r in range(3):
@@ -146,6 +154,7 @@ class TicTac:
         return {"rows": rows, "columns": columns, "diagonals": diagonals}
     
     def _draw_statistics(self):
+        """Parodo statistiką."""
         stats = (f"X: {self.x_laimejimai}  O: {self.o_laimejimai}  "
                 f"Lygiosios: {self.lygiosios} ")
         stat_text = TextBox(self, stats)
@@ -157,12 +166,13 @@ class TicTac:
         w, h = text_w + bx * 2, text_h + by * 2
 
         screen_w = self.screen.get_width()
-        left = max(8, (screen_w - w) // 2)
+        left = (screen_w - w) // 2
         stat_text.box_rect = pygame.Rect(left, padding, w, h)
         stat_text.text_rect.topleft = (stat_text.box_rect.left + bx, stat_text.box_rect.top + by)
         stat_text.draw()
 
     def _update_screen(self):
+        """Atnaujina vaizdą."""
         self.screen.fill(self.settings.bg_color)
         for row in range(3):
             for col in range(3):
